@@ -10,11 +10,11 @@ const productsSave = save('products');
 const server = restify.createServer({ name: SERVER_NAME });
 
 server.listen(PORT, HOST, function () {
-  console.log('Server %s listening at %s', server.name, server.url);
-  console.log('**** Resources: ****');
-  console.log('********************');
-  console.log('/products');
-  console.log('/products/:id');
+	console.log('Server %s listening at %s', server.name, server.url);
+	console.log('**** Resources: ****');
+	console.log('********************');
+	console.log('/products');
+	console.log('/products/:id');
 });
 
 server.use(restify.plugins.fullResponse());
@@ -22,34 +22,51 @@ server.use(restify.plugins.bodyParser());
 
 // Get all products in the system
 server.get('/products', function (req, res, next) {
-  console.log('GET /products params=>' + JSON.stringify(req.params));
+	console.log('GET /products params=>' + JSON.stringify(req.params));
 
-  // Find every product within the given collection
-  productsSave.find({}, function (error, products) {
-    if (error) return next(new errors.InternalServerError(JSON.stringify(error.errors)));
-    res.send(products);
-  });
+	// Find every product within the given collection
+	productsSave.find({}, function (error, products) {
+		if (error) return next(new errors.InternalServerError(JSON.stringify(error.errors)));
+		res.send(products);
+	});
+});
+
+// Get a single product by its product id
+server.get('/products/:id', function (req, res, next) {
+	console.log('GET /products/:id params=>' + JSON.stringify(req.params));
+
+	// Find a single product by its id within save
+	productsSave.findOne({ _id: req.params.id }, function (error, product) {
+		if (error) return next(new errors.InternalServerError(JSON.stringify(error.errors)));
+		if (product) {
+			res.send(product);
+		} else {
+			res.send(404);
+		}
+	});
 });
 
 // Create a new product
 server.post('/products', function (req, res, next) {
-  console.log('POST /products params=>' + JSON.stringify(req.params));
-  console.log('POST /products body=>' + JSON.stringify(req.body));
+	console.log('POST /products params=>' + JSON.stringify(req.params));
+	console.log('POST /products body=>' + JSON.stringify(req.body));
 
-  // Validation of mandatory fields
-  if (req.body.name === undefined || req.body.price === undefined || req.body.quantity === undefined) {
-    return next(new errors.BadRequestError('name and price and quantity must be supplied'));
-  }
+	// Validation of mandatory fields
+	if (req.body.name === undefined || req.body.price === undefined || req.body.quantity === undefined) {
+		return next(new errors.BadRequestError('name and price and quantity must be supplied'));
+	}
 
-  let newProduct = {
-    name: req.body.name, 
-    price: req.body.price,
-    quantity: req.body.quantity
-  };
+	let newProduct = {
+		name: req.body.name,
+		price: req.body.price,
+		quantity: req.body.quantity
+	};
 
-  // Create the product using the persistence engine
-  productsSave.create(newProduct, function (error, product) {
-    if (error) return next(new errors.InternalServerError(JSON.stringify(error.errors)));
-    res.send(201, product);
-  });
+	// Create the product using the persistence engine
+	productsSave.create(newProduct, function (error, product) {
+		if (error) return next(new errors.InternalServerError(JSON.stringify(error.errors)));
+		res.send(201, product);
+	});
 });
+
+
