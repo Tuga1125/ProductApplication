@@ -69,4 +69,14 @@ server.post('/products', function (req, res, next) {
 	});
 });
 
+// Delete a product by its id
+server.del('/products/:id', function (req, res, next) {
+  console.log('DELETE /products/:id params=>' + JSON.stringify(req.params));
+  
+  // Delete the product with the persistence engine
+  productsSave.delete(req.params.id, function (error) {
+    if (error) return next(new errors.InternalServerError(JSON.stringify(error.errors)));
+    res.send(204);
+  });
+});
 
