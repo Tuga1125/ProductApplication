@@ -17,8 +17,23 @@ server.listen(PORT, HOST, function () {
 	console.log('/products/:id');
 });
 
+let getRequestCounter = 0;
+let postRequestCounter = 0;
+
 server.use(restify.plugins.fullResponse());
 server.use(restify.plugins.bodyParser());
+
+// Middleware to count GET and POST requests
+server.use((req, res, next) => {
+  if (req.method === 'GET') {
+    getRequestCounter++;
+  } else if (req.method === 'POST') {
+    postRequestCounter++;
+  }
+
+  console.log(`Processed Request Count--> Get:${getRequestCounter}, Post:${postRequestCounter}`);
+  next();
+});
 
 // Get all products in the system
 server.get('/products', function (req, res, next) {
